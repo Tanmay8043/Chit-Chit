@@ -1,26 +1,29 @@
 <script>
     import {db} from "./firebase";
     import { collectionData } from "rxfire/firestore";
-    import { startWith } from "rxjs/operators"
+    import { startWith } from "rxjs/operators";
 import { collection, doc, addDoc } from "firebase/firestore";
+import { query, orderBy, limit } from "firebase/firestore";  
  
     export let user;
     export let logout;
 
     let message="";
 
-    const query = collection(db, "chats");
-    const chats = collectionData(query, "id").pipe(startWith([]));
+    const q1 = collection(db, "chats");
+	const q = query(q1, orderBy("sentAt", "asc"));
+    const chats = collectionData(q, "id").pipe(startWith([]));
 
 
     async function sendMessage() {
-        const docRef = await addDoc(collection(db, "chats"), {
+		if(message !="")
+        {const docRef = await addDoc(collection(db, "chats"), {
            uid: user.uid,
            message: message,
            avatar: user.photoURL,
            sentAt: +new Date() 
         });
-        message = "";
+        message = "";}
     }
 </script>
 
@@ -29,7 +32,7 @@ import { collection, doc, addDoc } from "firebase/firestore";
         <div class="logo">Chit-chit</div>
         <button on:click={logout}>Logout</button>
     </div>
-    <div class="messages">
+    <div class="messages ove">
         {#each $chats as chat}
             {#if user.uid == chat.uid}
                 <div class="message my-message">
@@ -62,7 +65,7 @@ import { collection, doc, addDoc } from "firebase/firestore";
 		height: 100%;
 	}
 	.header {
-		width: 100%;
+		width: 95%;
 		height: 50px;
 		display: flex;
 		justify-content: space-between;
@@ -71,21 +74,25 @@ import { collection, doc, addDoc } from "firebase/firestore";
 		border-bottom: 1px solid #ddd;
 	}
 	.header .logo {
-		font-size: 15px;
+		font-size: 20px;
 		font-weight: 600;
 		color: #111;
 	}
 	.header button {
-		margin-right: 20px;
+		margin-top: auto;
 		background: transparent;
 		padding: 5px 10px;
 		border: 1px solid #ddd;
 		color: #555;
-		font-size: 15px;
-		cursor: pointer;
+		font-size: 15px;		cursor: pointer;
 	}
+
+	.header button:hover{
+		background-color:gray;
+		font-weight: bold;
+	}
+
 	.form {
-		display: flex;
 		width: 100%;
 		height: 40px;
 		border-top: 1px solid #ddd;
@@ -95,12 +102,15 @@ import { collection, doc, addDoc } from "firebase/firestore";
 		border: none;
 		outline: none;
 		font-size: 16px;
+		display: inline;
+		width: 80%;
 		color: #111;
 		padding: 10px;
 		margin-bottom: 20px;
 	}
 	.form button {
-		display:flex;
+		display:inline;
+		margin-left: 8px;
 		padding: 10px;
 		font-size: 20px;
 		color: #555;
@@ -110,8 +120,9 @@ import { collection, doc, addDoc } from "firebase/firestore";
 		cursor: pointer;
 	}
 	.messages {
-		width: 100%;
-		height: calc(100% - 90px);
+		background-color: #111;
+		width: 95%;
+		height: calc(100% - 120px);
 		padding: 10px;
 		overflow-y: auto;
 	}
