@@ -4,14 +4,19 @@
     import { startWith } from "rxjs/operators";
 import { collection, doc, addDoc } from "firebase/firestore";
 import { query, orderBy, limit } from "firebase/firestore";  
+import { onMount } from "svelte";
  
     export let user;
     export let logout;
 
+	onMount(async()=>{
+		document.querySelector('.demo').scrollTop(document.querySelector('.demo')[0].scrollHeight);
+	})
+
     let message="";
 
     const q1 = collection(db, "chats");
-	const q = query(q1, orderBy("sentAt", "asc"));
+	const q = query(q1, orderBy("sentAt", "desc"));
     const chats = collectionData(q, "id").pipe(startWith([]));
 
 
@@ -25,14 +30,15 @@ import { query, orderBy, limit } from "firebase/firestore";
         });
         message = "";}
     }
+
 </script>
 
-<main>
+<div class="outer">
     <div class="header">
         <div class="logo">Chit-chit</div>
         <button on:click={logout}>Logout</button>
     </div>
-    <div class="messages ove">
+    <div id="demo" class="messages ">
         {#each $chats as chat}
             {#if user.uid == chat.uid}
                 <div class="message my-message">
@@ -52,16 +58,18 @@ import { query, orderBy, limit } from "firebase/firestore";
             {/if}
         {/each}
     </div>
-    <div class="form">
-        <input type="text" bind:value={message} >
-        <button on:click={sendMessage}>
-            <i class="fa fa-paper-plane"></i>
-        </button>
-    </div>
-</main>
+	<form on:submit|preventDefault={sendMessage}>
+		<div class="form">
+			<input type="text" bind:value={message} >
+			<button type="submit">
+				<i class="fa fa-paper-plane"></i>
+			</button>
+		</div>
+</form>
+</div>
 
 <style>
-    main {
+    .outer {
 		height: 100%;
 	}
 	.header {
@@ -84,7 +92,8 @@ import { query, orderBy, limit } from "firebase/firestore";
 		padding: 5px 10px;
 		border: 1px solid #ddd;
 		color: #555;
-		font-size: 15px;		cursor: pointer;
+		font-size: 15px;		
+		cursor: pointer;
 	}
 
 	.header button:hover{
@@ -119,12 +128,15 @@ import { query, orderBy, limit } from "firebase/firestore";
 		outline: none;
 		cursor: pointer;
 	}
+
 	.messages {
-		background-color: #111;
 		width: 95%;
 		height: calc(100% - 120px);
 		padding: 10px;
 		overflow-y: auto;
+		overflow: auto;
+		display: flex;
+		flex-direction: column-reverse;
 	}
 	.messages::-webkit-scrollbar {
 		width: 4px;
